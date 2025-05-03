@@ -6,3 +6,4 @@ services:
     startCommand: python main.py
     routes:
       - path: "/"
+      - path: "/webhook"
