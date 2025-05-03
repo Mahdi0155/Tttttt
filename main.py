@@ -1,3 +1,5 @@
+# main.py
+
 from flask import Flask, request
 import requests
 import threading
@@ -72,7 +74,7 @@ def webhook():
             caption = users[uid]["caption"]
             cover_id = msg["photo"][-1]["file_id"]
             code = gen_code()
-            save_file(file_id)
+            save_file(file_id, code)
             text = f"<a href='https://t.me/HotTofBot?start={code}'>مشاهده</a>\n\n{CHANNEL_TAG}"
             send("sendPhoto", {
                 "chat_id": cid,
