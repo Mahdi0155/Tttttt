@@ -1,5 +1,3 @@
-# main.py
-
 from flask import Flask, request
 import requests
 import threading
@@ -14,7 +12,9 @@ users = {}
 pinging = True
 
 def send(method, data):
-    return requests.post(f"{URL}/{method}", json=data).json()
+    response = requests.post(f"{URL}/{method}", json=data).json()
+    print(f"Response from {method}: {response}")  # لاگ پاسخ از تلگرام
+    return response
 
 def delete(chat_id, message_id):
     send("deleteMessage", {"chat_id": chat_id, "message_id": message_id})
@@ -62,6 +62,7 @@ def webhook():
         elif state.get("step") == "awaiting_video" and "video" in msg:
             users[uid]["step"] = "awaiting_caption"
             users[uid]["file_id"] = msg["video"]["file_id"]
+            print(f"Received video file_id: {users[uid]['file_id']}")  # لاگ شناسه فایل ویدیو
             send("sendMessage", {"chat_id": cid, "text": "کپشن رو بنویس"})
 
         elif state.get("step") == "awaiting_caption":
@@ -74,6 +75,7 @@ def webhook():
             caption = users[uid]["caption"]
             cover_id = msg["photo"][-1]["file_id"]
             code = gen_code()
+            print(f"Saving file with code: {code} and file_id: {file_id}")  # لاگ ذخیره کد و شناسه فایل
             save_file(file_id, code)
             text = f"<a href='https://t.me/HotTofBot?start={code}'>مشاهده</a>\n\n{CHANNEL_TAG}"
             send("sendPhoto", {
@@ -110,9 +112,12 @@ def webhook():
         msg = update["message"]
         cid = msg["chat"]["id"]
         code = msg["text"].split("/start ")[1]
+        print(f"Received /start with code: {code}")  # لاگ کد ارسال شده
         file_id = get_file(code)
+        print(f"File_id retrieved from database: {file_id}")  # لاگ شناسه فایل از دیتابیس
         if file_id:
             sent = send("sendVideo", {"chat_id": cid, "video": file_id})
+            print(f"Sent video response: {sent}")  # لاگ پاسخ ارسال ویدیو
             if "result" in sent:
                 mid = sent["result"]["message_id"]
                 send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
