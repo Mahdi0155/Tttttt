@@ -1,7 +1,8 @@
 import json
 import uuid
 import time
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.parsemode import ParseMode
 from telegram.ext import (
     Updater, CommandHandler, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler
 )
