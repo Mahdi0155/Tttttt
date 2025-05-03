@@ -13,7 +13,7 @@ pinging = True
 
 def send(method, data):
     response = requests.post(f"{URL}/{method}", json=data).json()
-    print(f"Response from {method}: {response}")  # لاگ پاسخ از تلگرام
+    print(f"Response from {method}: {response}")
     return response
 
 def delete(chat_id, message_id):
@@ -36,6 +36,24 @@ def index():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     update = request.get_json()
+
+    # ابتدا بررسی کنیم اگر پیام start با کد بود
+    if "message" in update and "text" in update["message"] and update["message"]["text"].startswith("/start "):
+        msg = update["message"]
+        cid = msg["chat"]["id"]
+        code = msg["text"].split("/start ")[1]
+        print(f"Received /start with code: {code}")
+        file_id = get_file(code)
+        print(f"File_id retrieved from database: {file_id}")
+        if file_id:
+            sent = send("sendVideo", {"chat_id": cid, "video": file_id})
+            print(f"Sent video response: {sent}")
+            if "result" in sent:
+                mid = sent["result"]["message_id"]
+                send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
+                threading.Timer(20, delete, args=(cid, mid)).start()
+        return "ok"
+
     if "message" in update:
         msg = update["message"]
         uid = msg["from"]["id"]
@@ -62,7 +80,7 @@ def webhook():
         elif state.get("step") == "awaiting_video" and "video" in msg:
             users[uid]["step"] = "awaiting_caption"
             users[uid]["file_id"] = msg["video"]["file_id"]
-            print(f"Received video file_id: {users[uid]['file_id']}")  # لاگ شناسه فایل ویدیو
+            print(f"Received video file_id: {users[uid]['file_id']}")
             send("sendMessage", {"chat_id": cid, "text": "کپشن رو بنویس"})
 
         elif state.get("step") == "awaiting_caption":
@@ -75,7 +93,7 @@ def webhook():
             caption = users[uid]["caption"]
             cover_id = msg["photo"][-1]["file_id"]
             code = gen_code()
-            print(f"Saving file with code: {code} and file_id: {file_id}")  # لاگ ذخیره کد و شناسه فایل
+            print(f"Saving file with code: {code} and file_id: {file_id}")
             save_file(file_id, code)
             text = f"<a href='https://t.me/HotTofBot?start={code}'>مشاهده</a>\n\n{CHANNEL_TAG}"
             send("sendPhoto", {
@@ -108,20 +126,6 @@ def webhook():
             users[uid]["step"] = "awaiting_forward"
             send("sendMessage", {"chat_id": cid, "text": "پست بعدی رو بفرست"})
 
-    elif "message" in update and "text" in update["message"] and update["message"]["text"].startswith("/start "):
-        msg = update["message"]
-        cid = msg["chat"]["id"]
-        code = msg["text"].split("/start ")[1]
-        print(f"Received /start with code: {code}")  # لاگ کد ارسال شده
-        file_id = get_file(code)
-        print(f"File_id retrieved from database: {file_id}")  # لاگ شناسه فایل از دیتابیس
-        if file_id:
-            sent = send("sendVideo", {"chat_id": cid, "video": file_id})
-            print(f"Sent video response: {sent}")  # لاگ پاسخ ارسال ویدیو
-            if "result" in sent:
-                mid = sent["result"]["message_id"]
-                send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
-                threading.Timer(20, delete, args=(cid, mid)).start()
     return "ok"
 
 if __name__ == "__main__":
