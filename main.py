@@ -1,11 +1,9 @@
-# main.py
-
 from flask import Flask, request
 import requests
 import threading
 import time
 from config import BOT_TOKEN, WEBHOOK_URL, ADMIN_IDS, CHANNEL_TAG, PING_INTERVAL
-from database import init_db, add_video_id, get_video_id
+from database import save_file, get_file
 from utils import gen_code
 
 app = Flask(__name__)
@@ -28,7 +26,6 @@ def ping():
         time.sleep(PING_INTERVAL)
 
 threading.Thread(target=ping, daemon=True).start()
-init_db()
 
 @app.route("/")
 def index():
@@ -75,7 +72,7 @@ def webhook():
             caption = users[uid]["caption"]
             cover_id = msg["photo"][-1]["file_id"]
             code = gen_code()
-            add_video_id(code, file_id)
+            save_file(file_id)
             text = f"<a href='https://t.me/{BOT_TOKEN.split(':')[0]}?start={code}'>مشاهده</a>\n\n{CHANNEL_TAG}"
             send("sendPhoto", {
                 "chat_id": cid,
@@ -111,7 +108,7 @@ def webhook():
         msg = update["message"]
         cid = msg["chat"]["id"]
         code = msg["text"].split("/start ")[1]
-        file_id = get_video_id(code)
+        file_id = get_file(code)
         if file_id:
             sent = send("sendVideo", {"chat_id": cid, "video": file_id})
             if "result" in sent:
