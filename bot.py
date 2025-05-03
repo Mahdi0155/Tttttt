@@ -165,7 +165,7 @@ def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 def main():
-    TOKEN = "7413532622:AAGmb4UihdcGROnhhSVwTwz_0jy9DaovjWo"
+    TOKEN = "7413532622:AAGUIJIR9fYe3SSi7CMqTQ5biBs63Bgfxn4"
     PORT = int(os.environ.get("PORT", 5000))
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
