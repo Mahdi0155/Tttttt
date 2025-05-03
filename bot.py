@@ -171,9 +171,25 @@ def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 async def main():
-    TOKEN = os.environ.get("BOT_TOKEN", "توکن_تست_اینجا")  # برای تست دستی توکن رو بنویس
+    TOKEN = os.environ["BOT_TOKEN"]  # حتما تو محیط تعریف شده باشه
     application = ApplicationBuilder().token(TOKEN).build()
 
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("panel", panel)],
+        states={
+            STATES["CHOOSING_MODE"]: [CallbackQueryHandler(choose_mode)],
+            STATES["WAIT_FILE"]: [MessageHandler(filters.PHOTO | filters.VIDEO, handle_file)],
+            STATES["WAIT_COVER"]: [MessageHandler(filters.PHOTO, handle_cover)],
+            STATES["WAIT_CAPTION"]: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_caption)],
+            STATES["WAIT_CAPTION_SIMPLE"]: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_caption_simple)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    application.add_handler(conv_handler)
+    application.add_handler(CommandHandler("start", start))
+
+    await application.run_polling()
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("panel", panel)],
         states={
