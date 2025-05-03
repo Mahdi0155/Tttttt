@@ -8,9 +8,8 @@ def gen_code(length=8):
     code = ''.join(random.choice(characters) for _ in range(length))
     return code
 
-def save_file(file_id):
-    """ذخیره فایل در دیتابیس و دریافت کد مربوطه"""
-    return db_save_file(file_id)
+def save_file(file_id, code):
+    return db_save_file(file_id, code)
 
 def get_file(code):
     """دریافت فایل از دیتابیس بر اساس کد"""
