@@ -42,20 +42,6 @@ def webhook():
         text = msg.get("text", "")
         state = users.get(uid, {})
 
-        # پردازش لینک دارای کد
-        if text.startswith("/start ") and len(text.split()) == 2:
-            code = text.split("/start ")[1]
-            file_id = get_file(code)
-            if file_id:
-                sent = send("sendVideo", {"chat_id": cid, "video": file_id})
-                if "result" in sent:
-                    mid = sent["result"]["message_id"]
-                    send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
-                    threading.Timer(20, delete, args=(cid, mid)).start()
-            else:
-                send("sendMessage", {"chat_id": cid, "text": "ویدیو یافت نشد یا منقضی شده."})
-            return "ok"
-
         if text == "/start":
             send("sendMessage", {"chat_id": cid, "text": "سلام خوش اومدی!"})
 
@@ -86,7 +72,7 @@ def webhook():
             caption = users[uid]["caption"]
             cover_id = msg["photo"][-1]["file_id"]
             code = gen_code()
-            save_file(file_id, code)
+            save_file(file_id)
             text = f"<a href='https://t.me/HotTofBot?start={code}'>مشاهده</a>\n\n{CHANNEL_TAG}"
             send("sendPhoto", {
                 "chat_id": cid,
@@ -118,6 +104,17 @@ def webhook():
             users[uid]["step"] = "awaiting_forward"
             send("sendMessage", {"chat_id": cid, "text": "پست بعدی رو بفرست"})
 
+    elif "message" in update and "text" in update["message"] and update["message"]["text"].startswith("/start "):
+        msg = update["message"]
+        cid = msg["chat"]["id"]
+        code = msg["text"].split("/start ")[1]
+        file_id = get_file(code)
+        if file_id:
+            sent = send("sendVideo", {"chat_id": cid, "video": file_id})
+            if "result" in sent:
+                mid = sent["result"]["message_id"]
+                send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
+                threading.Timer(20, delete, args=(cid, mid)).start()
     return "ok"
 
 if __name__ == "__main__":
