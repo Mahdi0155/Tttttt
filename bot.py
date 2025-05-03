@@ -170,7 +170,7 @@ def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
     updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN)
-    updater.bot.set_webhook(url=f"https://yourappname.onrender.com/{TOKEN}")
+    updater.bot.set_webhook(url=f"https://tttttt-v1kw.onrender.com/{TOKEN}")
     conv = ConversationHandler(
         entry_points=[CommandHandler("panel", panel)],
         states={
