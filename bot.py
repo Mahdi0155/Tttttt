@@ -5,7 +5,7 @@ import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext,
+    ApplicationBuilder, CommandHandler, MessageHandler, filters,
     ConversationHandler, CallbackQueryHandler, ContextTypes
 )
 from flask import Flask
@@ -128,6 +128,13 @@ async def handle_caption_simple(update: Update, context: ContextTypes.DEFAULT_TY
     await update.message.reply_text("پیش‌نمایش ساخته شد. پیام رو کپی کن و توی کانال ارسال کن.")
     return ConversationHandler.END
 
+async def delete_message(context: ContextTypes.DEFAULT_TYPE):
+    msg = context.job.data.get("message")
+    try:
+        await msg.delete()
+    except:
+        pass
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
@@ -148,8 +155,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         thumb = item.get("thumb_id")
         sent = await update.message.reply_video(video=file_id, thumbnail=thumb, caption=caption)
-    await context.application.job_queue.run_once(lambda c: sent.delete(), 20)
-    await context.application.job_queue.run_once(lambda c: warning.delete(), 20)
+
+    context.application.job_queue.run_once(delete_message, 20, data={"message": sent})
+    context.application.job_queue.run_once(delete_message, 20, data={"message": warning})
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("عملیات لغو شد.")
@@ -163,7 +171,7 @@ def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 async def main():
-    TOKEN = os.environ.get("BOT_TOKEN")
+    TOKEN = os.environ.get("BOT_TOKEN", "توکن_تست_اینجا")  # برای تست دستی توکن رو بنویس
     application = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
@@ -182,7 +190,6 @@ async def main():
     application.add_handler(CommandHandler("start", start))
 
     threading.Thread(target=run_flask).start()
-
     await application.run_polling()
 
 if __name__ == "__main__":
