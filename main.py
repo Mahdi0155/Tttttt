@@ -116,3 +116,8 @@ def webhook():
                 send("sendMessage", {"chat_id": cid, "text": "این ویدیو بعد از ۲۰ ثانیه حذف می‌شود."})
                 threading.Timer(20, delete, args=(cid, mid)).start()
     return "ok"
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
