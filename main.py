@@ -69,11 +69,11 @@ def webhook():
             kb = {"keyboard": [[{"text": "🔞سوپر"}], [{"text": "🖼پست"}]], "resize_keyboard": True}
             send("sendMessage", {"chat_id": cid, "text": "سلام آقا مدیر 🔱", "reply_markup": kb})
 
-        elif text == "سوپر" and uid in ADMIN_IDS:
+        elif text == "🔞سوپر" and uid in ADMIN_IDS:
             users[uid] = {"step": "awaiting_video"}
-            send("sendMessage", {"chat_id": cid, "text": "ویدیو رو بفرست"})
+            send("sendMessage", {"chat_id": cid, "text": "ای جان یه سوپر ناب برام بفرست 🍌"})
 
-        elif text == "پست" and uid in ADMIN_IDS:
+        elif text == "🖼پست" and uid in ADMIN_IDS:
             users[uid] = {"step": "awaiting_forward"}
             send("sendMessage", {"chat_id": cid, "text": "محتوا رو برا فوروارد کن یادت نره تگ بزنی روش ✅️"})
 
