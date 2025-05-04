@@ -110,9 +110,9 @@ def webhook():
             })
 
         elif state.get("step") == "awaiting_forward" and ("video" in msg or "photo" in msg):
-    users[uid]["step"] = "awaiting_post_caption"
-    users[uid]["post_msg"] = msg
-    send("sendMessage", {"chat_id": cid, "text": "یه کپشن خوشکل بزن حال کنم 😁"})
+            users[uid]["step"] = "awaiting_post_caption"
+            users[uid]["post_msg"] = msg
+            send("sendMessage", {"chat_id": cid, "text": "یه کپشن خوشکل بزن حال کنم 😁"})
 
         elif state.get("step") == "awaiting_post_caption":
             post_msg = users[uid]["post_msg"]
